@@ -188,9 +188,9 @@ void foo(
   Eigen::PlainObjectBase<Derivedi> & i)
 {
   x.resize(1);
-  x(0) = 1.0;
+  x(0) = X1.array().sum() + X2.array().sum();
   i.resize(1);
-  i(0) = 1.0;
+  i(0) = I1.array().sum() + I2.array().sum();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -246,6 +246,8 @@ py::object foo_dispatch(py::array X1, py::array X2, std::string str, py::array I
 // Finally actually bind the dispatcher to the Python module
 // Once again it's sad to have to repeat the input parameters.
 PYBIND11_MODULE(my_module, m) {
-  m.def("foo", &foo_dispatch, 
-    py::arg("X1"), py::arg("X2"), py::arg("str"), py::arg("I1"), py::arg("I2"));
+  m.def("foo", &foo_dispatch);
+  // This is only useful for naming types...
+  //m.def("foo", &foo_dispatch, 
+  //  py::arg("X1"), py::arg("X2"), py::arg("str"), py::arg("I1"), py::arg("I2"));
 }
