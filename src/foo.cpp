@@ -7,7 +7,7 @@
 namespace py = pybind11;
 
 ///////////////////////////////////////////////////////////////////////////////////
-/// Example library function
+/// Example library function (we assume this cannot be changed)
 ///////////////////////////////////////////////////////////////////////////////////
 
 // Libigl style function with const MatrixBase & for input and PlainObjectBase & for output
@@ -17,20 +17,32 @@ template <
   typename DerivedI1,
   typename DerivedI2,
   typename Derivedx,
-  typename Derivedi >
+  typename Derivedi,
+  typename s_type,
+  typename t_type
+  >
 void foo(
-  const  Eigen::MatrixBase<DerivedX1> & X1,
-  const  Eigen::MatrixBase<DerivedX2> & X2,
+  const Eigen::MatrixBase<DerivedX1> & X1,
+  const Eigen::MatrixBase<DerivedX2> & X2,
   const std::string & str,
-  const  Eigen::MatrixBase<DerivedI1> & I1,
-  const  Eigen::MatrixBase<DerivedI2> & I2,
+  const Eigen::MatrixBase<DerivedI1> & I1,
+  const Eigen::MatrixBase<DerivedI2> & I2,
   Eigen::PlainObjectBase<Derivedx> & x,
-  Eigen::PlainObjectBase<Derivedi> & i)
+  Eigen::PlainObjectBase<Derivedi> & i,
+  Eigen::SparseMatrix<s_type> & s,
+  Eigen::SparseMatrix<t_type> & t)
 {
   x.resize(1);
   x(0) = X1.array().sum() + X2.array().sum();
   i.resize(1);
   i(0) = I1.array().sum() + I2.array().sum();
+
+  s.resize(1,1);
+  s.insert(0,0) = x(0);
+  s.makeCompressed();
+  t.resize(1,1);
+  t.insert(0,0) = i(0);
+  t.makeCompressed();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -55,8 +67,10 @@ py::object foo_binding(
 {
   Eigen::Matrix<numeric, Eigen::Dynamic, 1> x;
   Eigen::Matrix<integer, Eigen::Dynamic, 1> i;
-  foo(X1, X2, str, I1, I2, x, i);
-  return py::make_tuple(x, i);
+  Eigen::SparseMatrix<numeric> s;
+  Eigen::SparseMatrix<integer> t;
+  foo(X1, X2, str, I1, I2, x, i, s, t);
+  return py::make_tuple(x, i, s, t);
 }
 
 // This dispatcher is responsible for exploding the different combinations of

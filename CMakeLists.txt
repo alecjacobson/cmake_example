@@ -24,7 +24,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(libigl)
 
 # Add the target for the pybind11 module
-pybind11_add_module(my_module src/bindings.cpp)
+pybind11_add_module(my_module src/foo.cpp)
 
 # Link Eigen to the target
 # include the include/ directory of this project
