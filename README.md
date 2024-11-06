@@ -1,9 +1,9 @@
 # Build
 
-```bash
+```fish
 mkdir build
 cd build
-cmake ..
+cmake .. -DPython_EXECUTABLE=(which python) 
 make
 ```
 

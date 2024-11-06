@@ -4,16 +4,29 @@ project(MyEigenPybind11Module)
 # use C++20
 set(CMAKE_CXX_STANDARD 20)
 
+if (CMAKE_VERSION VERSION_LESS 3.18)
+  set(DEV_MODULE Development)
+else()
+  set(DEV_MODULE Development.Module)
+endif()
+
+find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+
 # Enable FetchContent to download dependencies at configure time
 include(FetchContent)
 
-# Download and set up pybind11
+# Download and set up nanobind
 FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    GIT_TAG        v2.13.6
+  nanobind
+  GIT_REPOSITORY https://github.com/wjakob/nanobind.git
+  GIT_TAG        v2.2.0
 )
-FetchContent_MakeAvailable(pybind11)
+FetchContent_MakeAvailable(nanobind)
 
 # Download and set up libigl
 FetchContent_Declare(
@@ -23,8 +36,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(libigl)
 
-# Add the target for the pybind11 module
-pybind11_add_module(my_module src/foo.cpp)
+# Add the target for the nanobind module
+nanobind_add_module(my_module src/foo.cpp)
 
 # Link Eigen to the target
 # include the include/ directory of this project
