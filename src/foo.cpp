@@ -8,6 +8,12 @@
 
 namespace nb = nanobind;
 
+///////////////////////////////////////////////////////////////////////////////////
+/// Default numeric and integer types. Passing anything else will result in an
+/// implicit copy. Developers insisting on native executation of libigl on
+/// single-precision (largely untested and possibly error prone) can change this
+/// to float and recompile bindings at their own delight or peril.
+///////////////////////////////////////////////////////////////////////////////////
 using Numeric = double;
 using Integer = int64_t;
 namespace Eigen
@@ -19,7 +25,6 @@ namespace Eigen
   typedef SparseMatrix<Numeric> SparseMatrixN;
   typedef SparseMatrix<Integer> SparseMatrixI;
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -63,10 +68,10 @@ void foo(
 
 ///////////////////////////////////////////////////////////////////////////////////
 /// For each library function like `foo` we'll need to write the following
-/// boilerplate:
+/// boilerplate to move output parameters to the return tuple.
 ///////////////////////////////////////////////////////////////////////////////
 
-nb::object foo_binding(
+nb::object foo_wrapper(
   const nb::DRef<const Eigen::MatrixXN> & X1,
   const nb::DRef<const Eigen::MatrixXN> & X2,
   const nb::DRef<const Eigen::MatrixXI> & I1,
@@ -78,12 +83,10 @@ nb::object foo_binding(
   Eigen::SparseMatrixI t;
   foo(X1, X2, "hello", I1, I2, x, i, s, t);
   return nb::make_tuple(x, i, s, t);
-  //return nb::none();
 }
 
-// Finally actually bind the dispatcher to the Python module
-// Once again it's sad to have to repeat the input parameters.
+// Bind the wrapper to the Python module
 NB_MODULE(my_module, m) {
-  m.def("foo", &foo_binding, 
+  m.def("foo", &foo_wrapper, 
     nb::arg("X1"), nb::arg("X2"), nb::arg("I1"), nb::arg("I2"));
 }
